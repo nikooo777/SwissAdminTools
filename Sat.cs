@@ -10,12 +10,18 @@ using System.Threading.Tasks;
 
 namespace SwissAdminTools;
 
+public class SATConfiguration : ModuleConfiguration
+{
+    public string ConnectionString { get; set; } = "server=localhost;user=battlebit;password=battlebit;database=battlebit";
+}
+
 public class Sat : BattleBitModule
 {
+    public SATConfiguration Configuration { get; set; }
+
     public Sat()
     {
-        const string connectionString = "server=localhost;user=battlebit;password=battlebit;database=battlebit";
-        Storage = new SwissAdminToolsMysql(connectionString);
+        Storage = new SwissAdminToolsMysql(this.Configuration.ConnectionString); // breaks: Configuration is available on modules loaded, not constructor
     }
 
     public SwissAdminToolsMysql Storage { get; set; }
