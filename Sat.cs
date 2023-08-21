@@ -19,9 +19,9 @@ public class Sat : BattleBitModule
 {
     public SATConfiguration Configuration { get; set; }
 
-    public Sat()
+    public override void OnModulesLoaded()
     {
-        Storage = new SwissAdminToolsMysql(this.Configuration.ConnectionString); // breaks: Configuration is available on modules loaded, not constructor
+        Storage = new SwissAdminToolsMysql(this.Configuration.ConnectionString);
     }
 
     public SwissAdminToolsMysql Storage { get; set; }
