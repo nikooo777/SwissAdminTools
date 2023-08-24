@@ -1,9 +1,4 @@
-﻿using BattleBitAPI;
-using BattleBitAPI.Common;
-using BattleBitAPI.Server;
-using BBRAPIModules;
-using MySql.Data.MySqlClient;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,27 +6,33 @@ using System.Numerics;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using BattleBitAPI.Common;
+using BBRAPIModules;
+using MySql.Data.MySqlClient;
 
 namespace SwissAdminTools;
 
 #region Configuration
+
 public class SATConfiguration : ModuleConfiguration
 {
     public string ConnectionString { get; set; } = "server=localhost;user=battlebit;password=battlebit;database=battlebit";
 }
+
 #endregion
 
 #region SAT Module
+
 public class Sat : BattleBitModule
 {
     public SATConfiguration Configuration { get; set; }
 
+    public SwissAdminToolsMysql Storage { get; set; }
+
     public override void OnModulesLoaded()
     {
-        Storage = new SwissAdminToolsMysql(this.Configuration.ConnectionString);
+        Storage = new SwissAdminToolsMysql(Configuration.ConnectionString);
     }
-
-    public SwissAdminToolsMysql Storage { get; set; }
 
     public override Task OnConnected()
     {
@@ -101,9 +102,11 @@ public class Sat : BattleBitModule
         return Task.FromResult<OnPlayerSpawnArguments?>(request);
     }
 }
+
 #endregion
 
 #region Admin Tools
+
 public static class AdminTools
 {
     public enum BlockType
@@ -254,6 +257,7 @@ public static class AdminTools
                 Console.Error.WriteLine("could not parse teleport target");
                 return false;
             }
+
             var targets = FindTarget(possibleTarget, sender, server).ToList();
             targets.ForEach(t =>
             {
@@ -278,12 +282,14 @@ public static class AdminTools
             server.MessageToPlayer(sender, "Invalid number of arguments for gag command (<target> <length> <reason>)");
             return false;
         }
+
         var possibleTarget = args.GetString();
         if (possibleTarget == null)
         {
             Console.Error.WriteLine("could not parse gag target");
             return false;
         }
+
         var targets = FindTarget(possibleTarget, sender, server);
 
         var mins = args.GetInt();
@@ -303,6 +309,7 @@ public static class AdminTools
             Console.Error.WriteLine("could not parse gag reason");
             return false;
         }
+
         try
         {
             targets.ToList().ForEach(t =>
@@ -330,12 +337,14 @@ public static class AdminTools
             server.MessageToPlayer(sender, "Invalid number of arguments for say command (<message>)");
             return false;
         }
+
         var msg = args.GetRemainingString();
         if (msg == null)
         {
             Console.Error.WriteLine("could not parse say message");
             return false;
         }
+
         server.SayToAllChat($"{RichText.Red}[{RichText.Bold("ADMIN")}]: {RichText.Magenta}{RichText.Italic(msg)}");
         return false;
     }
@@ -360,6 +369,7 @@ public static class AdminTools
             Console.Error.WriteLine("could not parse kick target");
             return false;
         }
+
         var targets = FindTarget(possibleTarget, sender, server);
         var reason = args.Count() > 1 ? args.GetRemainingString() : "Kicked by admin";
         try
@@ -389,6 +399,7 @@ public static class AdminTools
                 Console.Error.WriteLine("could not parse slay target");
                 return false;
             }
+
             var targets = FindTarget(possibleTarget, sender, server).ToList();
             targets.ForEach(t =>
             {
@@ -434,6 +445,7 @@ public static class AdminTools
             Console.Error.WriteLine("could not parse ban target");
             return false;
         }
+
         var targets = FindTarget(possibleTarget, sender, server);
         var mins = args.GetInt();
         if (mins == null)
@@ -620,9 +632,11 @@ public static class AdminTools
         }
     }
 }
+
 #endregion
 
 #region Storage
+
 internal class SourceBans
 {
     public bool IsBanned(ulong steamId)
@@ -982,9 +996,11 @@ public interface SwissAdminToolsStore
     List<ReportData> GetAllPendingReports();
     void StorePlayer(ulong steamId, PlayerJoiningArguments player);
 }
+
 #endregion
 
 #region Utils
+
 public static class RichText
 {
     public const string LineBreak = "<br>";
@@ -1163,4 +1179,5 @@ public static class RichText
 
     #endregion
 }
+
 #endregion
